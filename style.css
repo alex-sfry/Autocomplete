@@ -40,3 +40,7 @@
     background-color: var(--bs-success);
     --bs-dropdown-link-color: var(--bs-light);
 }
+
+.ac-container .dropdown-item.selected:active {
+    --bs-dropdown-link-active-color: var(--bs-light);
+}
