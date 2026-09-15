@@ -62,6 +62,8 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
      */
     function handleApiData(data) {
         ddm.innerHTML = '';
+        s.innerHTML = '';
+        selectedEl = null;
 
         if (data.length === 0) {
             ddm.innerHTML = `
@@ -76,7 +78,8 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
             li.classList.add(['dropdown-item']);
             li.setAttribute('role', 'option');
             li.setAttribute('data-id', `${i.id}`);
-            li.setAttribute('tabIndex', idx);
+            li.setAttribute('data-idx', idx);
+            li.setAttribute('tabIndex', 0);
             li.setAttribute('id', 'ac-option-' + idx);
             li.setAttribute('aria-selected', 'false');
             li.textContent = i.name
@@ -109,25 +112,24 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
         if (e.key === 'ArrowDown' && menuItems.length) {
             ddm.removeAttribute('hidden');
             if (selectedEl) {
-                const idx = selectedEl.tabIndex;
+                const idx = parseInt(selectedEl.dataset.idx);
                 if (menuItems.length - 1 > idx) {
-                    menuItems[idx + 1].focus()
-                    c.setAttribute(
-                        'aria-activedescendant', `ac-option-${idx + 1}`
-                    );
+                    menuItems[idx + 1].focus();
+                } else {
+                    menuItems[0].focus();
                 }
             } else {
                 menuItems[0].focus();
-                    c.setAttribute(
-                        'aria-activedescendant', 'ac-option-0'
-                    );
             }
+            c.setAttribute('aria-activedescendant', 'ac-option-0');
         }
     })
 
     ddm.addEventListener('keyup', e => {
         if (e.key === 'ArrowDown') {
-            const idx = ddm.querySelector('.dropdown-item:focus').tabIndex;
+            const idx = parseInt(
+                ddm.querySelector('.dropdown-item:focus').dataset.idx
+            );
             if (menuItems.length - 1 > idx) {
                 menuItems[idx + 1].focus()
                 c.setAttribute(
@@ -141,7 +143,9 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
             }
         }
         if (e.key === 'ArrowUp') {
-            const idx = ddm.querySelector('.dropdown-item:focus').tabIndex;
+            const idx = parseInt(
+                ddm.querySelector('.dropdown-item:focus').dataset.idx
+            );
             if (idx > 0) {
                 menuItems[idx - 1].focus()
                 c.setAttribute(
