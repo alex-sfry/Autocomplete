@@ -1,0 +1,25 @@
+{
+  "name": "combobox-jquery",
+  "version": "1.0.0",
+  "description": "Simple combobox, designed to work with remote sources.<br>",
+  "main": "main.js",
+  "scripts": {
+    "start": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alex-sfry/combobox-jquery.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/alex-sfry/combobox-jquery/issues"
+  },
+  "homepage": "https://github.com/alex-sfry/combobox-jquery#readme",
+  "devDependencies": {
+    "webpack": "^5.111.1",
+    "webpack-cli": "^7.2.3"
+  }
+}

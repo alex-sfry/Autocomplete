@@ -55,3 +55,4 @@ document_errors
 .svn
 *.db
 *.sqlite
+node_modules
