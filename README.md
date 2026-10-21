@@ -1,4 +1,4 @@
-# Combobox
+# Autocomplete
 Simple Autocomplete, designed to work with remote sources.<br>
 
 Requirements:<br>
