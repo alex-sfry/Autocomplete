@@ -1,5 +1,6 @@
 .ac-container {
-    position: relative;;
+    position: relative;
+    ;
 }
 
 .dd-menu {
@@ -9,11 +10,16 @@
     margin-top: 0.25rem;
     position: absolute;
     border-radius: var(--bs-border-radius);
+    background-color: var(--light);
 }
 
 .ac-container .dropdown-item {
     cursor: default;
     padding: 0.25rem 0.5rem;
+}
+
+.ac-container .dropdown-item.found-nothing-item {
+    font-weight: 600;
 }
 
 .ac-container .dropdown-item:first-of-type {

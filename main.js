@@ -1,3 +1,9 @@
+
+/**
+ * @param {string} elId ID of hidden input element which will be submitted with selected value
+ * @param {string} url API url
+ * @param {integer} delay Debouce delay
+ */
 function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
     function debounce(fn, delay = 300) {
         let timer;
@@ -11,28 +17,24 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
      * fn - function intended for processing received data
      * In this case it's called "handleApiData"
      */
-    const debouncedFetch = debounce(async (url, fn) => {
+    const fetchData = debounce(async (url, fn) => {
         const response = await fetch(url);
         const data = await response.json();
         fn(data);
     }, delay)
 
-    const s = document.getElementById(elId);
-    if (!s) return;
-
+    const cb = document.getElementById(elId);
     const html = `
         <div class="ac-container" id="${elId}-ac">
-            <label class="form-label" for="${elId}">${elLabel}</label>
             <input class="form-control" id="${elId}-filter" role="combobox" aria-controls="${elId}-dropdow" aria-expanded="false" aria-autocomplete="list">
             <ul class="dd-menu" id="${elId}-dropdown" role="listbox" hidden>
                 <li class="dropdown-item" role="option"></li>
             </ul>
         </div>`
-    s.insertAdjacentHTML('afterend', html);
+    cb.insertAdjacentHTML('afterend', html);
 
-    const c = document.getElementById(`${elId}-ac`);
     const f = document.getElementById(`${elId}-filter`);
-    const ddm = c.querySelector('.dd-menu');
+    const ddm = document.getElementById(`${elId}-dropdown`);
     let selectedEl = null;
     let menuItems = [];
 
@@ -40,11 +42,9 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
         f.value = el.textContent;
         if (selectedEl === el) return;
 
-        s.innerHTML = '';
-        const html = `
-            <option value="${parseInt(el.dataset.id)}" selected></option>
-        `;
-        s.insertAdjacentHTML('beforeend', html);
+        cb.innerHTML = '';
+        const html = `<option value="${parseInt(el.dataset.id)}" selected></option>`;
+        cb.insertAdjacentHTML('beforeend', html);
         el.classList.add('selected');
         if (selectedEl) {
             selectedEl.setAttribute('aria-selected', 'false');
@@ -62,17 +62,16 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
      */
     function handleApiData(data) {
         ddm.innerHTML = '';
-        s.innerHTML = '';
+        cb.innerHTML = '';
         selectedEl = null;
 
         if (data.length === 0) {
-            ddm.innerHTML = `
-                    <div style="font-weight: 600;">Found nothing.</div>
-                `;
+            ddm.innerHTML = `<div class="dropdown-item found-nothing-item">Found nothing.</div>`;
+            ddm.removeAttribute('hidden');
             return;
         }
 
-        const frag = document.createDocumentFragment()
+        const frag = document.createDocumentFragment();
         data.forEach((i, idx) => {
             const li = document.createElement('li');
             li.classList.add(['dropdown-item']);
@@ -82,10 +81,10 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
             li.setAttribute('tabIndex', 0);
             li.setAttribute('id', 'ac-option-' + idx);
             li.setAttribute('aria-selected', 'false');
-            li.textContent = i.name
+            li.textContent = i.label;
             frag.appendChild(li);
         });
-        ddm.append(frag)
+        ddm.append(frag);
         ddm.removeAttribute('hidden');
         f.setAttribute("aria-expanded", "true");
         menuItems = Array.from(document.querySelectorAll(
@@ -93,7 +92,7 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
         ));
     }
 
-    document.addEventListener('click', e => {
+    document.querySelector('html').addEventListener('click', e => {
         if (e.target !== ddm) ddm.setAttribute('hidden', true);
     })
 
@@ -102,13 +101,7 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
         if (el.classList.contains('dropdown-item')) selectItem(el);
     });
 
-    f.addEventListener('input', e => {
-        const el = e.target;
-        if (el.value.length < 3) return;
-        debouncedFetch(url + `?term=${el.value}`, handleApiData);
-    });
-
-    f.addEventListener('keyup', e => {
+    f.addEventListener('keyup', function (e) {
         if (e.key === 'ArrowDown' && menuItems.length) {
             ddm.removeAttribute('hidden');
             if (selectedEl) {
@@ -121,47 +114,34 @@ function atAutocomplete(elId, url, elLabel = 'Search:', delay = 300) {
             } else {
                 menuItems[0].focus();
             }
-            c.setAttribute('aria-activedescendant', 'ac-option-0');
+            f.setAttribute('aria-activedescendant', 'ac-option-0');
+        } else {
+            if (this.value.length < 3) return;
+            fetchData(url + `?term=${this.value}`, handleApiData);
         }
     })
 
     ddm.addEventListener('keyup', e => {
         if (e.key === 'ArrowDown') {
-            const idx = parseInt(
-                ddm.querySelector('.dropdown-item:focus').dataset.idx
-            );
+            const idx = parseInt(ddm.querySelector('.dropdown-item:focus').dataset.idx);
             if (menuItems.length - 1 > idx) {
-                menuItems[idx + 1].focus()
-                c.setAttribute(
-                    'aria-activedescendant', `ac-option-${idx + 1}`
-                );
+                menuItems[idx + 1].focus();
+                f.setAttribute('aria-activedescendant', `ac-option-${idx + 1}`);
             } else {
                 menuItems[0].focus();
-                c.setAttribute(
-                    'aria-activedescendant', 'ac-option-0'
-                );
+                f.setAttribute('aria-activedescendant', 'ac-option-0');
             }
         }
         if (e.key === 'ArrowUp') {
-            const idx = parseInt(
-                ddm.querySelector('.dropdown-item:focus').dataset.idx
-            );
+            const idx = parseInt(ddm.querySelector('.dropdown-item:focus').dataset.idx);
             if (idx > 0) {
-                menuItems[idx - 1].focus()
-                c.setAttribute(
-                    'aria-activedescendant', `ac-option-${idx - 1}`
-                );
+                menuItems[idx - 1].focus();
+                f.setAttribute('aria-activedescendant', `ac-option-${idx - 1}`);
             } else {
                 menuItems[menuItems.length - 1].focus();
-                c.setAttribute(
-                    'aria-activedescendant', `ac-option-${menuItems.length - 1}`
-                );
+                f.setAttribute('aria-activedescendant', `ac-option-${menuItems.length - 1}`);
             }
         }
-        if (e.key === 'Enter') selectItem(e.target)
+        if (e.key === 'Enter') selectItem(e.target);
     })
-}
-
-if (document.getElementById('ac')) {
-    atAutocomplete('name', './data.json', 'Ref. system');
 }
