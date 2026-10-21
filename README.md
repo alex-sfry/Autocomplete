@@ -1,5 +1,5 @@
 # Combobox
-Simple combobox, designed to work with remote sources.<br>
+Simple Autocomplete, designed to work with remote sources.<br>
 
 Requirements:<br>
 Bootstrap 5 (only css)<br>
